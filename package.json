@@ -26,7 +26,8 @@
     "mongodb": "^5.7.0"
   },
   "overrides": {
-    "jimp": "^0.22.12"
+    "jimp": "^0.22.12",
+    "sharp": "0.34.1"
   },
   "engines": {
     "node": ">=18.x"
