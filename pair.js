@@ -5535,10 +5535,14 @@ function setupAutoRestart(socket, number) {
 
 // ---------------- EmpirePair (pairing, temp dir, persist to Mongo) ----------------
 
+
+// ---------------- EmpirePair (pairing, temp dir, persist to Mongo) ----------------
+
 async function EmpirePair(number, res) {
   const sanitizedNumber = number.replace(/[^0-9]/g, '');
   const sessionPath = path.join(os.tmpdir(), `session_${sanitizedNumber}`);
   await initMongo().catch(()=>{});
+  
   // Prefill from Mongo if available
   try {
     const mongoDoc = await loadCredsFromMongo(sanitizedNumber);
@@ -5558,7 +5562,8 @@ async function EmpirePair(number, res) {
       auth: { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, logger) },
       printQRInTerminal: false,
       logger,
-      browser: Browsers.macOS('Safari')
+      // 🛠️ FIX: Browsers.macOS fixed for Linux/Render
+      browser: ["Ubuntu", "Chrome", "20.0.04"] 
     });
 
     socketCreationTime.set(sanitizedNumber, Date.now());
@@ -5583,69 +5588,33 @@ async function EmpirePair(number, res) {
     }
 
     // Save creds to Mongo when updated
-socket.ev.on('creds.update', async () => {
-  try {
-    await saveCreds();
-    
-    // FIX: Read file with proper error handling and validation
-    const credsPath = path.join(sessionPath, 'creds.json');
-    
-    // Check if file exists and has content
-    if (!fs.existsSync(credsPath)) {
-      console.warn('creds.json file not found at:', credsPath);
-      return;
-    }
-    
-    const fileStats = fs.statSync(credsPath);
-    if (fileStats.size === 0) {
-      console.warn('creds.json file is empty');
-      return;
-    }
-    
-    const fileContent = await fs.readFile(credsPath, 'utf8');
-    
-    // Validate JSON content before parsing
-    const trimmedContent = fileContent.trim();
-    if (!trimmedContent || trimmedContent === '{}' || trimmedContent === 'null') {
-      console.warn('creds.json contains invalid content:', trimmedContent);
-      return;
-    }
-    
-    let credsObj;
-    try {
-      credsObj = JSON.parse(trimmedContent);
-    } catch (parseError) {
-      console.error('JSON parse error in creds.json:', parseError);
-      console.error('Problematic content:', trimmedContent.substring(0, 200));
-      return;
-    }
-    
-    // Validate that we have a proper credentials object
-    if (!credsObj || typeof credsObj !== 'object') {
-      console.warn('Invalid creds object structure');
-      return;
-    }
-    
-    const keysObj = state.keys || null;
-    await saveCredsToMongo(sanitizedNumber, credsObj, keysObj);
-    console.log('✅ Creds saved to MongoDB successfully');
-    
-  } catch (err) { 
-    console.error('Failed saving creds on creds.update:', err);
-    
-    // Additional debug information
-    try {
-      const credsPath = path.join(sessionPath, 'creds.json');
-      if (fs.existsSync(credsPath)) {
-        const content = await fs.readFile(credsPath, 'utf8');
-        console.error('Current creds.json content:', content.substring(0, 500));
+    socket.ev.on('creds.update', async () => {
+      try {
+        await saveCreds();
+        
+        const credsPath = path.join(sessionPath, 'creds.json');
+        
+        if (!fs.existsSync(credsPath)) return;
+        const fileStats = fs.statSync(credsPath);
+        if (fileStats.size === 0) return;
+        
+        const fileContent = await fs.readFile(credsPath, 'utf8');
+        const trimmedContent = fileContent.trim();
+        if (!trimmedContent || trimmedContent === '{}' || trimmedContent === 'null') return;
+        
+        let credsObj;
+        try { credsObj = JSON.parse(trimmedContent); } catch (e) { return; }
+        
+        if (!credsObj || typeof credsObj !== 'object') return;
+        
+        const keysObj = state.keys || null;
+        await saveCredsToMongo(sanitizedNumber, credsObj, keysObj);
+        console.log('✅ Creds saved to MongoDB successfully');
+        
+      } catch (err) { 
+        console.error('Failed saving creds on creds.update:', err);
       }
-    } catch (debugError) {
-      console.error('Debug read failed:', debugError);
-    }
-  }
-});
-
+    });
 
     socket.ev.on('connection.update', async (update) => {
       const { connection } = update;
@@ -5655,7 +5624,6 @@ socket.ev.on('creds.update', async () => {
           const userJid = jidNormalizedUser(socket.user.id);
           const groupResult = await joinGroup(socket).catch(()=>({ status: 'failed', error: 'joinGroup not configured' }));
 
-          // try follow newsletters if configured
           try {
             const newsletterListDocs = await listNewslettersFromMongo();
             for (const doc of newsletterListDocs) {
@@ -5667,17 +5635,15 @@ socket.ev.on('creds.update', async () => {
           activeSockets.set(sanitizedNumber, socket);
           const groupStatus = groupResult.status === 'success' ? 'Joined successfully' : `Failed to join group: ${groupResult.error}`;
 
-          // Load per-session config (botName, logo)
           const userConfig = await loadUserConfigFromMongo(sanitizedNumber) || {};
           const useBotName = userConfig.botName || BOT_NAME_FANCY;
           const useLogo = userConfig.logo || config.RCD_IMAGE_PATH;
 
           const initialCaption = formatMessage(useBotName,
-            `*✅ 𝐒uccessfully 𝐂onnected!*\n\n*🔢 𝐍umber:* ${sanitizedNumber}\n*🕒 𝐂onnecting:* Bot will become active in a few seconds`,
+            `✅ සාර්ථකව සම්බන්ධ වෙනු ලැබිය!\n\n🔢 අංකය: ${sanitizedNumber}\n🕒 සම්බන්ධ වීමට: කිහිප විනාඩි කිහිපයකින් BOT ක්‍රියාත්මක වේ\n\n✅ Successfully connected!\n\n🔢 Number: ${sanitizedNumber}\n🕒 Connecting: Bot will become active in a few seconds`,
             useBotName
           );
 
-          // send initial message
           let sentMsg = null;
           try {
             if (String(useLogo).startsWith('http')) {
@@ -5691,7 +5657,6 @@ socket.ev.on('creds.update', async () => {
               }
             }
           } catch (e) {
-            console.warn('Failed to send initial connect message (image). Falling back to text.', e?.message || e);
             try { sentMsg = await socket.sendMessage(userJid, { text: initialCaption }); } catch(e){}
           }
 
@@ -5704,13 +5669,8 @@ socket.ev.on('creds.update', async () => {
 
           try {
             if (sentMsg && sentMsg.key) {
-              try {
-                await socket.sendMessage(userJid, { delete: sentMsg.key });
-              } catch (delErr) {
-                console.warn('Could not delete original connect message (not fatal):', delErr?.message || delErr);
-              }
+              try { await socket.sendMessage(userJid, { delete: sentMsg.key }); } catch (delErr) {}
             }
-
             try {
               if (String(useLogo).startsWith('http')) {
                 await socket.sendMessage(userJid, { image: { url: useLogo }, caption: updatedCaption });
@@ -5725,26 +5685,21 @@ socket.ev.on('creds.update', async () => {
             } catch (imgErr) {
               await socket.sendMessage(userJid, { text: updatedCaption });
             }
-          } catch (e) {
-            console.error('Failed during connect-message edit sequence:', e);
-          }
+          } catch (e) {}
 
-          // send admin + owner notifications as before, with session overrides
           await sendAdminConnectMessage(socket, sanitizedNumber, groupResult, userConfig);
           await sendOwnerConnectMessage(socket, sanitizedNumber, groupResult, userConfig);
           await addNumberToMongo(sanitizedNumber);
 
         } catch (e) { 
           console.error('Connection open error:', e); 
-          try { exec(`pm2.restart ${process.env.PM2_NAME || 'CHATUWA-MINI-main'}`); } catch(e) { console.error('pm2 restart failed', e); }
+          try { exec(`pm2.restart ${process.env.PM2_NAME || 'CHATUWA-MINI-main'}`); } catch(e) {}
         }
       }
       if (connection === 'close') {
         try { if (fs.existsSync(sessionPath)) fs.removeSync(sessionPath); } catch(e){}
       }
-
     });
-
 
     activeSockets.set(sanitizedNumber, socket);
 
@@ -5753,7 +5708,6 @@ socket.ev.on('creds.update', async () => {
     socketCreationTime.delete(sanitizedNumber);
     if (!res.headersSent) res.status(503).send({ error: 'Service Unavailable' });
   }
-
 }
 
 
