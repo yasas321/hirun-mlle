@@ -23,7 +23,7 @@ const {
   jidNormalizedUser,
   downloadContentFromMessage,
   DisconnectReason
-} = require('@dark-yasiya/baileys');
+} = require('@whiskeysockets/baileys');
 
 // ---------------- CONFIG ----------------
 
