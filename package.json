@@ -8,7 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@dark-yasiya/baileys": "1.0.7",
+    "@whiskeysockets/baileys": "github:tenka-san/WaBails",
     "express": "^4.18.2",
     "fs-extra": "^11.2.0",
     "pino": "^8.17.0",
