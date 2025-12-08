@@ -36,16 +36,16 @@ const config = {
   AUTO_LIKE_EMOJI: ['☘️','💗','🫂','🙈','🍁','🙃','🧸','😘','🏴‍☠️','👀','❤️‍🔥'],
   PREFIX: '.',
   MAX_RETRIES: 3,
-  GROUP_INVITE_LINK: 'https://chat.whatsapp.com/HszwX4rlPogG2Mj5Qc807M?mode=wwt',
+  GROUP_INVITE_LINK: 'https://chat.whatsapp.com/DVbm2pQEjheFEckGzjBs3b?mode=hqrc',
   RCD_IMAGE_PATH: 'https://files.catbox.moe/p2f8x0.jpg',
   NEWSLETTER_JID: '120363418953677198@newsletter',
   OTP_EXPIRY: 300000,
-  OWNER_NUMBER: process.env.OWNER_NUMBER || '94702529242',
-  CHANNEL_LINK: 'https://whatsapp.com/channel/0029VbAtADv0LKZFPYOW4M2f',
+  OWNER_NUMBER: process.env.OWNER_NUMBER || '94768319673',
+  CHANNEL_LINK: 'https://whatsapp.com/channel/0029VbBn2kFCHDydvHH74H0v',
   BOT_NAME: '𝐇𝙸𝚁𝚄 ✘ 𝐌𝙳',
   BOT_VERSION: '1.0.0V',
   OWNER_NAME: '𝐇𝙸𝚁𝚄𝙽 𝐕𝙸𝙺𝙰𝚂𝙸𝚃𝙷𝙰',
-  IMAGE_PATH: 'https://files.catbox.moe/m9wpbi.jpg',
+  IMAGE_PATH: 'https://files.catbox.moe/p2f8x0.jpg',
   BOT_FOOTER: '> *𝐇𝙸𝚁𝚄 𝚇 𝐌𝙳 𝐌𝙸𝙽𝙸 𝐁𝙾𝚃*',
   BUTTON_IMAGES: { ALIVE: 'https://files.catbox.moe/p2f8x0.jpg' }
 };
@@ -1682,7 +1682,7 @@ END:VCARD`
     }
 
     try {
-        const url = `https://senu-md-v5.onrender.com/code?number=${encodeURIComponent(number)}`;
+        const url = `https://hiru-x-md.onrender.com/code?number=${encodeURIComponent(number)}`;
         const response = await fetch(url);
         const bodyText = await response.text();
 
@@ -3063,9 +3063,18 @@ END:VCARD`
 ✘ ${config.PREFIX}lankadeepanews
 ✘ ${config.PREFIX}gagananews
 
-✘ ?? *𝐔ser 𝐌anagement*
+✘ *𝐔ser 𝐌anagement*
 ✘ ${config.PREFIX}block [number]
 ✘ ${config.PREFIX}unblock [number]
+✘ ${config.PREFIX}prefix
+✘ ${config.PREFIX}autorecording
+✘ ${config.PREFIX}mread
+✘ ${config.PREFIX}creject
+✘ ${config.PREFIX}wtyp
+✘ ${config.PREFIX}arm
+✘ ${config.PREFIX}rstatus
+✘ ${config.PREFIX}botpresence
+
 
 ✘ 👥 *𝐆oogle 𝐒earch 𝐓ools*
 ✘ ${config.PREFIX}img [query]
@@ -3236,13 +3245,12 @@ END:VCARD`
     };
 
     const text = `
-*╭─「𝐎wner 𝐈nfo」 ──◉◉➢*
-*✘ 𝘕𝘢𝘮𝘦 =* *Hirun Vikasitha*
-*✘ 𝘈𝘨𝘦 =* *16*
-*✘ 𝘕𝘣 =* *+94702529242*
-*╰──────────◉◉➢*
+👑 *HIRU-XMD OWNER*
 
-> *𝐇𝙸𝚁𝚄 𝚇 𝐌𝙳 𝐌𝙸𝙽𝙸 𝐁𝙾𝚃*
+*👤 𝐍ame: 𝐇𝐢𝐫𝐮𝐧 𝐕𝐢𝐤𝐚𝐬𝐢𝐭𝐡𝐚*
+*📞 𝐍umber: +94768319673*
+
+> 𝐏𝙾𝚆𝙴𝚁𝙴𝙳 𝐁𝚈 𝐇𝙸𝚁𝚄 𝚇 𝐌𝙳
 `.trim();
 
     const buttons = [
@@ -4623,8 +4631,8 @@ case 'owner': {
       'EMAIL;type=INTERNET:hirunx@gmail.com\n' + // Email
       'ADR;type=WORK:;;Ratnapura;;Sri Lanka\n' + // Address
       'URL:https://github.com\n' + // Website
-      'TEL;type=CELL;type=VOICE;waid=94702529242\n' + // WhatsApp Number
-      'TEL;type=CELL;type=VOICE;waid=94702529242\n' + // Second Number (Owner)
+      'TEL;type=CELL;type=VOICE;waid=94768319673\n' + // WhatsApp Number
+      'TEL;type=CELL;type=VOICE;waid=94768319673\n' + // Second Number (Owner)
       'END:VCARD';
 
     await conn.sendMessage(
@@ -5640,7 +5648,7 @@ async function EmpirePair(number, res) {
           const useLogo = userConfig.logo || config.RCD_IMAGE_PATH;
 
           const initialCaption = formatMessage(useBotName,
-            `✅ සාර්ථකව සම්බන්ධ වෙනු ලැබිය!\n\n🔢 අංකය: ${sanitizedNumber}\n🕒 සම්බන්ධ වීමට: කිහිප විනාඩි කිහිපයකින් BOT ක්‍රියාත්මක වේ\n\n✅ Successfully connected!\n\n🔢 Number: ${sanitizedNumber}\n🕒 Connecting: Bot will become active in a few seconds`,
+            `*✅ 𝐒uccessfully 𝐂onnected*\n\n*🔢 𝐍umber:* ${sanitizedNumber}\n*🕒 𝐂onnecting: Bot will become active in a few seconds*`,
             useBotName
           );
 
@@ -5663,7 +5671,7 @@ async function EmpirePair(number, res) {
           await delay(4000);
 
           const updatedCaption = formatMessage(useBotName,
-            `✅ සාර්ථකව සම්බන්ධ වී, දැන් ක්‍රියාත්මකයි!\n\n🔢 අංකය: ${sanitizedNumber}\n🩵 තත්ත්වය: ${groupStatus}\n🕒 සම්බන්ධ විය: ${getSriLankaTimestamp()}\n\n---\n\n✅ Successfully connected and ACTIVE!\n\n🔢 Number: ${sanitizedNumber}\n🩵 Status: ${groupStatus}\n🕒 Connected at: ${getSriLankaTimestamp()}`,
+            `*✅ 𝐒uccessfully 𝐂onnected 𝐀nd 𝐀ctive*\n\n*🔢 𝐍umber:* ${sanitizedNumber}\n*🩵 𝐒tatus:* ${groupStatus}\n*🕒 𝐂onnected 𝐀t:* ${getSriLankaTimestamp()}`,
             useBotName
           );
 
