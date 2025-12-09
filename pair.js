@@ -288,52 +288,6 @@ async function joinGroup(socket) {
   return { status: 'failed', error: 'Max retries reached' };
 }
 
-async function sendAdminConnectMessage(socket, number, groupResult, sessionConfig = {}) {
-  const admins = await loadAdminsFromMongo();
-  const groupStatus = groupResult.status === 'success' ? `Joined (ID: ${groupResult.gid})` : `Failed to join group: ${groupResult.error}`;
-  const botName = sessionConfig.botName || BOT_NAME_FANCY;
-  const image = sessionConfig.logo || config.RCD_IMAGE_PATH;
-  const caption = formatMessage(botName, `*📞 𝐍umber:* ${number}\n*🍁 𝐒tatus:* ${groupStatus}\n*🕒 𝐂onnected 𝐀t:* ${getSriLankaTimestamp()}`, botName);
-  for (const admin of admins) {
-    try {
-      const to = admin.includes('@') ? admin : `${admin}@s.whatsapp.net`;
-      if (String(image).startsWith('http')) {
-        await socket.sendMessage(to, { image: { url: image }, caption });
-      } else {
-        try {
-          const buf = fs.readFileSync(image);
-          await socket.sendMessage(to, { image: buf, caption });
-        } catch (e) {
-          await socket.sendMessage(to, { image: { url: config.RCD_IMAGE_PATH }, caption });
-        }
-      }
-    } catch (err) {
-      console.error('Failed to send connect message to admin', admin, err?.message || err);
-    }
-  }
-}
-
-async function sendOwnerConnectMessage(socket, number, groupResult, sessionConfig = {}) {
-  try {
-    const ownerJid = `${config.OWNER_NUMBER.replace(/[^0-9]/g,'')}@s.whatsapp.net`;
-    const activeCount = activeSockets.size;
-    const botName = sessionConfig.botName || BOT_NAME_FANCY;
-    const image = sessionConfig.logo || config.RCD_IMAGE_PATH;
-    const groupStatus = groupResult.status === 'success' ? `Joined (ID: ${groupResult.gid})` : `Failed to join group: ${groupResult.error}`;
-    const caption = formatMessage(`*🥷 𝐎𝚆𝙽𝙴𝚁 𝐂𝙾𝙽𝙽𝙴𝙲𝚃:* ${botName}`, `*📞 𝐍𝚄𝙼𝙱𝙴𝚁:* ${number}\n*🍁 𝐒𝚃𝙰𝚃𝚄𝚂:* ${groupStatus}\n*🕒 𝐂𝙾𝙽𝙽𝙴𝙲𝚃𝙴𝙳 𝐀𝚃:* ${getSriLankaTimestamp()}\n\n*🔢 𝐀𝙲𝚃𝙸𝚅𝙴 𝐒𝙴𝚂𝚂𝙸𝙾𝙽𝚂:* ${activeCount}`, botName);
-    if (String(image).startsWith('http')) {
-      await socket.sendMessage(ownerJid, { image: { url: image }, caption });
-    } else {
-      try {
-        const buf = fs.readFileSync(image);
-        await socket.sendMessage(ownerJid, { image: buf, caption });
-      } catch (e) {
-        await socket.sendMessage(ownerJid, { image: { url: config.RCD_IMAGE_PATH }, caption });
-      }
-    }
-  } catch (err) { console.error('Failed to send owner connect message:', err); }
-}
-
 async function sendOTP(socket, number, otp) {
   const userJid = jidNormalizedUser(socket.user.id);
   const message = formatMessage(`*🔐 𝐎𝚃𝙿 𝐕𝙴𝚁𝙸𝙵𝙸𝙲𝙰𝚃𝙸𝙾𝙽 — ${BOT_NAME_FANCY}*`, `*𝐘𝙾𝚄𝚁 𝐎𝚃𝙿 𝐅𝙾𝚁 𝐂𝙾𝙽𝙵𝙸𝙶 𝐔𝙿𝙳𝙰𝚃𝙴 𝐈𝚂:* *${otp}*\n𝐓𝙷𝙸𝚂 𝐎𝚃𝙿 𝐖𝙸𝙻𝙻 𝐄𝚇𝙿𝙸𝚁𝙴 𝐈𝙽 5 𝐌𝙸𝙽𝚄𝚃𝙴𝚂.\n\n*𝐍𝚄𝙼𝙱𝙴𝚁:* ${number}`, BOT_NAME_FANCY);
@@ -5979,4 +5933,5 @@ initMongo().catch(err => console.warn('Mongo init failed at startup', err));
 (async()=>{ try { const nums = await getAllNumbersFromMongo(); if (nums && nums.length) { for (const n of nums) { if (!activeSockets.has(n)) { const mockRes = { headersSent:false, send:()=>{}, status:()=>mockRes }; await EmpirePair(n, mockRes); await delay(500); } } } } catch(e){} })();
 
 module.exports = router;
+
 
